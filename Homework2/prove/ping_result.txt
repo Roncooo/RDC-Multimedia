@@ -1,0 +1,18 @@
+
+Esecuzione di Ping atl.speedtest.clouvider.net [92.119.16.139] con 20 byte di dati:
+Risposta da 92.119.16.139: byte=20 durata=309ms TTL=49
+Risposta da 92.119.16.139: byte=20 durata=321ms TTL=49
+Risposta da 92.119.16.139: byte=20 durata=159ms TTL=49
+Risposta da 92.119.16.139: byte=20 durata=453ms TTL=49
+Risposta da 92.119.16.139: byte=20 durata=297ms TTL=49
+Risposta da 92.119.16.139: byte=20 durata=311ms TTL=49
+Risposta da 92.119.16.139: byte=20 durata=228ms TTL=49
+Risposta da 92.119.16.139: byte=20 durata=293ms TTL=49
+Risposta da 92.119.16.139: byte=20 durata=368ms TTL=49
+Risposta da 92.119.16.139: byte=20 durata=166ms TTL=49
+
+Statistiche Ping per 92.119.16.139:
+    Pacchetti: Trasmessi = 10, Ricevuti = 10, 
+    Persi = 0 (0% persi),
+Tempo approssimativo percorsi andata/ritorno in millisecondi:
+    Minimo = 159ms, Massimo =  453ms, Medio =  290ms

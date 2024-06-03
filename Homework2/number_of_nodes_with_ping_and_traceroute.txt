@@ -1,0 +1,4 @@
+Calculating numeber of nodes to reach atl.speedtest.clouvider.net using ping and traceroute
+  Command   | # Nodes  | Ex. time 
+    ping    |    14    |  3.919   s
+ traceroute |    14    |  77.515  s

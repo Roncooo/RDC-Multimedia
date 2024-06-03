@@ -1,0 +1,3 @@
+
+Esecuzione di Ping atl.speedtest.clouvider.net [92.119.16.139] con 20 byte di dati:
+Risposta da 92.119.16.139: byte=20 durata=111ms TTL=52
