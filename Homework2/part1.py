@@ -4,6 +4,7 @@ import time
 
 def number_of_nodes_with_ping_and_traceroute(target_name):
     print(f"Calculating numeber of nodes to reach {target_name} using ping and traceroute")
+    print(f"Could take around 2 minutes")
     title_pattern = "{:^12}|{:^10}|{:^10}"
     elements_pattern = "{:^12}|{:^10}|{:^10.3f}s"
     print(title_pattern.format("Command", "# Nodes", "Ex. time"))
@@ -19,15 +20,5 @@ def number_of_nodes_with_ping_and_traceroute(target_name):
     print(elements_pattern.format("traceroute", n_traceroute, end_time-start_time))
 
 
-def main():
-    ttl = 30
-    K = 10 # number of packets
-    L = 20 # number of bytes
-    target_name = "atl.speedtest.clouvider.net"
-    result_file = "ping_request.txt"
-    
-    # number_of_nodes_with_ping_and_traceroute(target_name)
-    
-
-if __name__ == "__main__":
-    main()
+target_name = "atl.speedtest.clouvider.net"
+number_of_nodes_with_ping_and_traceroute(target_name)
