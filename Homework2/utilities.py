@@ -1,43 +1,43 @@
 import os
-import numpy as np
 from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures._base import Future
+from typing import List
 from commands import ping
 from commands import traceroute
 
 class Result:
-    def __init__(self, l, m):
-        self.L = l
-        self.M = m
+    def __init__(self, l_bytes: int, list: List[float]):
+        self.L_bytes = l_bytes
+        self.rtt_list = list
     def __str__(self):
-        return f"[L:{self.L}\nM:{self.M}]"
+        return f"[{self.L_bytes}, {self.rtt_list}]"
 
-
-def parse_ping_result(result_string: str)->np.ndarray:
+def parse_psing_result(result_string: str) -> List[float]:
     """
     Returns:
-    np.ndarray: one row for each one of the K pings, 
-                on the first column the values of time
-                on the second column the values of TTL
+    np.array with the RTTs of the K packages 
     """
     
-    result_matrix = np.empty([0,2], dtype=int)
+    result_array = []
+    time_unit = "ms"
+    first_word_of_result_line = "Reply from"
+    time_prefix = ": "
     
     for line in result_string.splitlines():
-        word_before_time = "durata="
-        time_unit = "ms"
-        index = line.find(word_before_time)
+        if line=="" or line[:len(first_word_of_result_line)]!=first_word_of_result_line:
+            continue
+        index = line.find(time_prefix)
         if index == -1:
             continue
-        time_and_ttl = line[index + len(word_before_time):]
-        time = (int) (time_and_ttl[0:time_and_ttl.find(time_unit)])
-        ttl = (int) (time_and_ttl[time_and_ttl.find("=")+1:])
+        time_word = line[index + len(time_prefix):]
+        time = float(time_word[0:time_word.find(time_unit)])
         
-        result_matrix = np.vstack([result_matrix, [time, ttl]])
+        result_array.append(time)
     
-    return result_matrix
+    return result_array
 
 
-def find_nodes_with_ping_callback(future):
+def find_nodes_with_ping_callback(future: Future) -> None:
     file_name, ttl = future.args
     f = open(file_name)
     result_string = f.read()

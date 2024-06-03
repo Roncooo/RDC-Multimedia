@@ -11,13 +11,13 @@ TTL	reached destination
 10	False
 11	False
 12	False
-13	False
+13	True
 14	True
 15	True
 16	True
-17	False
-18	False
+17	True
+18	True
 19	True
 20	True
 
-The minimum TTL to reach destination (number of nodes) is 14
+The minimum TTL to reach destination (number of nodes) is 13
