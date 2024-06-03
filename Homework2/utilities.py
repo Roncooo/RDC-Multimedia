@@ -61,7 +61,7 @@ def find_nodes_with_ping(target_name, min_ttl=1, max_ttl=20, output_file="nodes_
         # Submit tasks to the executor
         for ttl in range(min_ttl, max_ttl+1):
             temp_file_name = temp_file_name_pattern.format(str(ttl))
-            future = executor.submit(ping, ttl, K, L, target_name, temp_file_name)
+            future = executor.submit(ping, target_name, ttl, K, L, True, temp_file_name)
             future.args = temp_file_name, ttl
             future.add_done_callback(find_nodes_with_ping_callback)
             futures.append(future)

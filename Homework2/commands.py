@@ -1,6 +1,6 @@
 import os
 
-def ping(ttl: int, K: int, L: int, target_name: str, result_file:str=None, do_not_fragmentate:bool=True):
+def ping(target_name: str, ttl: int=None, K: int=None, L: int=None, do_not_fragmentate:bool=True, result_file:str=None):
     """
     Creates the ping command with the given parameters and, if set, prints the output into result_file.
     
@@ -12,11 +12,12 @@ def ping(ttl: int, K: int, L: int, target_name: str, result_file:str=None, do_no
     result_file:    name of the txt file in which the result is stored
     
     """
-    command = 'ping {target_name} -i {ttl} -n {K} -l {L} '.format(target_name=target_name, ttl=ttl, K=K, L=L)
-    if(do_not_fragmentate == True):
-        command = command + '-f '
-    if(result_file != None):
-        command = command + '> {result_file}'.format(result_file=result_file)
+    command  = f'ping {target_name} '
+    command += f'-i {ttl} ' if ttl!=None else ""
+    command += f'-n {K} ' if K!=None else ""
+    command += f'-l {L} ' if L!=None else ""
+    command += f'-f ' if do_not_fragmentate else ""
+    command += f'> {result_file}' if result_file!=None else ""
     
     os.system(command)
 
