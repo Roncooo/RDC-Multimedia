@@ -54,11 +54,15 @@ def parse_ping_result_data(file_name: str) -> List[Result]:
     return list
 
 
-def plot_save_multiple_results(x: List[int], all_y: List[List[float]], filename: str):
+def plot_save_multiple_results(x: List[int], all_y: List[List[float]], filename: str, p=None):
     plt.figure(filename)
     # Create the plot
     for i in range(len(x)):
         plt.scatter([x[i]] * len(all_y[i]), all_y[i], s=20, alpha=0.6, edgecolors='w', linewidth=0.5, label=f'Group {x[i]}')
+        
+    if(p!=None):
+        y_fit = p(np.array(x))
+        plt.plot(x, y_fit, color='blue', label='Fitted Polynomial')
     # Add titles and labels
     plt.title(f'Results of {K} pings to {target_name} with L step of {L_byte_step} bytes')
     plt.xlabel('L (pkt size) - bytes')
@@ -81,27 +85,26 @@ def plot_save_single_results(x: List[int], min_y: List[float], filename: str, ty
     plt.savefig(filename)
 
 
-
-
 K = 200 # number of packets sent for each L_byte value
-target_name = "lyon.testdebit.info"
-L_byte_step=20
+target_name = "89.84.1.242"
+L_byte_step=50
 max_threads=10
 execution_name = f"pings_{target_name}_K{K}_step{L_byte_step}_th{max_threads}"
 # execution_name = "pings_lyon.testdebit.info_K100_step20_th10"
 output_file = f"{execution_name}.txt"
-perform_pings_and_save_into_file(K=K, L_byte_step=L_byte_step, output_file=output_file, target_name=target_name, function=win_psping)
+perform_pings_and_save_into_file(K=K, L_byte_step=L_byte_step, output_file=output_file, target_name=target_name, function=win_psping, max_threads=max_threads)
 results: List[Result] = parse_ping_result_data(output_file)
 
 x = [result.L_bytes for result in results]
 all_y = [result.rtt_list for result in results]
-all_results_plot_filename = f"{execution_name}_all.png"
-plot_save_multiple_results(x, all_y, all_results_plot_filename)
-
 min_y = [min(result.rtt_list) for result in results]
-min_results_plot_filename = f"{execution_name}_min.png"
 p = Polynomial.fit(x, min_y, 1)
 print(p)
+
+all_results_plot_filename = f"{execution_name}_all.png"
+plot_save_multiple_results(x, all_y, all_results_plot_filename, p)
+
+min_results_plot_filename = f"{execution_name}_min.png"
 plot_save_single_results(x, min_y, min_results_plot_filename, "Min", p)
 
 avg_y = [mean(result.rtt_list) for result in results]
