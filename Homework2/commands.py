@@ -23,7 +23,7 @@ def win_ping(target_name: str, ttl: int=None, K: int=None, L: int=None, do_not_f
     os.system(command)
 
 
-def linux_ping(target_name: str, ttl: int, K: int=None, L: int=None, result_file:str=None):
+def linux_ping(target_name: str, ttl: int=None, K: int=None, L: int=None, result_file:str=None):
     """
     Creates the ping command with the given parameters and, if set, prints the output into result_file.
     
@@ -35,7 +35,7 @@ def linux_ping(target_name: str, ttl: int, K: int=None, L: int=None, result_file
     result_file:        name of the txt file in which the result is stored
     
     """
-    command  = f'ping'
+    command  = f'ping '
     command += f'-i {ttl} ' if ttl!=None else ""
     command += f'-c {K} ' if K!=None else ""
     command += f'-s {L} ' if L!=None else ""
