@@ -2,7 +2,9 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures._base import Future
 from typing import List
-from commands import ping
+from commands import win_ping
+from commands import linux_ping
+from commands import win_psping
 from commands import traceroute
 
 class Result:
@@ -12,17 +14,11 @@ class Result:
     def __str__(self):
         return f"[{self.L_bytes}, {self.rtt_list}]"
 
-def parse_psing_result(result_string: str) -> List[float]:
-    """
-    Returns:
-    np.array with the RTTs of the K packages 
-    """
-    
+def parse_win_psping(result_string: str) -> List[float]:
     result_array = []
     time_unit = "ms"
     first_word_of_result_line = "Reply from"
     time_prefix = ": "
-    
     for line in result_string.splitlines():
         if line=="" or line[:len(first_word_of_result_line)]!=first_word_of_result_line:
             continue
@@ -31,10 +27,51 @@ def parse_psing_result(result_string: str) -> List[float]:
             continue
         time_word = line[index + len(time_prefix):]
         time = float(time_word[0:time_word.find(time_unit)])
-        
         result_array.append(time)
-    
     return result_array
+
+
+def parse_win_ping(result_string: str) -> List[float]:
+    result_array = []
+    time_prefix = "durata="
+    measure_unit = "ms"
+    for line in result_string.splitlines():
+        if line=="":
+            continue
+        index = line.find(time_prefix)
+        if index == -1:
+            continue
+        time_word = line[index + len(time_prefix):].split()[0]
+        time = float(time_word[:len(time_word)-len(measure_unit)])
+        result_array.append(time)
+    return result_array
+
+def parse_linux_ping(result_string: str) -> List[float]:
+    result_array = []
+    time_prefix = "time="
+    for line in result_string.splitlines():
+        if line=="":
+            continue
+        index = line.find(time_prefix)
+        if index == -1:
+            continue
+        time_word = line[index + len(time_prefix):]
+        time = float(time_word.split()[0])
+        result_array.append(time)
+    return result_array
+
+
+def parse_ping_result(result_string: str, function) -> List[float]:
+    """
+    Returns:
+    np.array with the RTTs of the K packages 
+    """
+    if function==win_psping:
+        return parse_win_psping(result_string)
+    if function==win_ping:
+        return parse_win_ping(result_string)
+    if function==linux_ping:
+        return parse_linux_ping(result_string)
 
 
 def find_nodes_with_ping_callback(future: Future) -> None:
@@ -61,7 +98,7 @@ def find_nodes_with_ping(target_name, min_ttl=1, max_ttl=20, output_file="nodes_
         # Submit tasks to the executor
         for ttl in range(min_ttl, max_ttl+1):
             temp_file_name = temp_file_name_pattern.format(str(ttl))
-            future = executor.submit(ping, target_name, ttl, K, L, True, temp_file_name)
+            future = executor.submit(win_ping, target_name, ttl, K, L, True, temp_file_name)
             future.args = temp_file_name, ttl
             future.add_done_callback(find_nodes_with_ping_callback)
             futures.append(future)

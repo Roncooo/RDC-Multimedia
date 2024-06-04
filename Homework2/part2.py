@@ -1,36 +1,35 @@
 import os
-import numpy as np
 import ast
 from concurrent.futures import Future, ThreadPoolExecutor
 from concurrent.futures._base import Future
 from typing import List
-from utilities import Result, parse_psing_result
-from commands import psping
+from utilities import Result, parse_ping_result
+from commands import win_psping
 # pip install matplotlib
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 
 min_L_byte = 10
 max_L_byte = 1472
 
 def callback(future: Future) -> None:
-    temp_file_name, L_byte = future.args
+    temp_file_name, L_byte, function = future.args
     f = open(temp_file_name)
     result_string = f.read()
     f.close()
     os.remove(temp_file_name)
-    list = parse_psing_result(result_string)
+    list = parse_ping_result(function, result_string)
     future.result = Result(L_byte, list)
 
-def perform_pings_and_save_into_file(K: int, L_byte_step: int, output_file: str, target_name: str, max_threads: int=10, min_L_byte: int=10, max_L_byte: int=1472,):
+def perform_pings_and_save_into_file(K: int, L_byte_step: int, output_file: str, target_name: str, function=win_psping, max_threads: int=10, min_L_byte: int=10, max_L_byte: int=1472,):
     with ThreadPoolExecutor(max_workers=max_threads) as executor:
         futures = []
         # Submit tasks to the executor
         for L_byte in range(min_L_byte,max_L_byte+1,L_byte_step):
             temp_file_name = f"ping_result_L_{L_byte}.txt"
-            future = executor.submit(psping, target_name=target_name, K=K, result_file=temp_file_name)
+            future = executor.submit(function, target_name=target_name, K=K, result_file=temp_file_name)
             
-            future.args = temp_file_name, L_byte
+            future.args = temp_file_name, L_byte, function
             future.add_done_callback(callback)
             futures.append(future)
 
@@ -41,7 +40,7 @@ def perform_pings_and_save_into_file(K: int, L_byte_step: int, output_file: str,
             file.write("\n")
 
 
-def parse_ping_data(file_name: str) -> List[Result]:
+def parse_ping_result_data(file_name: str) -> List[Result]:
     list = []
     with open(file_name, "r") as file:
         result_string = file.read()
@@ -57,9 +56,11 @@ target_name = "atl.speedtest.clouvider.net"
 L_byte_step=50
 max_threads=10
 output_file = f"lots_of_pings_K{K}_step{L_byte_step}_th{max_threads}.txt"
-perform_pings_and_save_into_file(K=K, L_byte_step=L_byte_step, output_file=output_file, target_name=target_name)
-results: List[Result] = parse_ping_data(output_file)
+perform_pings_and_save_into_file(K=K, L_byte_step=L_byte_step, output_file=output_file, target_name=target_name, function=win_psping)
+results: List[Result] = parse_ping_result_data(output_file)
 
+
+'''
 x = [result.L_bytes for result in results]
 y = [result.rtt_list for result in results]
 plt.figure(1)
@@ -86,3 +87,4 @@ plt.xlabel('L (pkt size) - bytes')
 plt.ylabel('RTT_min - ms')
 
 plt.savefig(f"lots_of_pings_K{K}_step{L_byte_step}_th{max_threads}_min.png")
+'''
