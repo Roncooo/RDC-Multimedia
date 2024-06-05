@@ -96,9 +96,9 @@ K = 200 # number of packets sent for each L_byte value
 target_name = "lyon.testdebit.info"
 L_byte_step=20
 max_threads=10
-execution_name = f"pings_{target_name}_K{K}_step{L_byte_step}_th{max_threads}"
+execution_name = f"home_pings_{target_name}_K{K}_step{L_byte_step}_th{max_threads}"
 output_file = f"{execution_name}.txt"
-# perform_pings_and_save_into_file(K=K, L_byte_step=L_byte_step, output_file=output_file, target_name=target_name, function=win_psping, max_threads=max_threads)
+perform_pings_and_save_into_file(K=K, L_byte_step=L_byte_step, output_file=output_file, target_name=target_name, function=win_psping, max_threads=max_threads)
 results: List[Result] = parse_ping_result_data(output_file)
 
 x = [result.L_bytes for result in results]
