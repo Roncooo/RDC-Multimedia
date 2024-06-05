@@ -36,8 +36,8 @@ def linux_ping(target_name: str, ttl: int=None, K: int=None, L: int=None, result
     
     """
     command  = f'ping '
-    command += f'-i {ttl} ' if ttl!=None else ""
-    command += f'-c {K} ' if K!=None else ""
+    command += f'-t {ttl} ' if ttl!=None else ""
+    command += f'-c {K} ' if K!=None else "-c 1 "
     command += f'-s {L} ' if L!=None else ""
     command += target_name
     command += f'> {result_file}' if result_file!=None else ""

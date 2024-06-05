@@ -1,2 +1,2 @@
 
-The minimum TTL to reach destination (number of nodes) is 9
+The minimum TTL to reach destination (number of nodes) is 14

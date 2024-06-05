@@ -9,7 +9,6 @@ from utilities import Result, parse_ping_result
 from commands import *
 import numpy as np
 from numpy.polynomial import Polynomial
-# pip install matplotlib
 import matplotlib.pyplot as plt
 
 
@@ -74,37 +73,38 @@ def plot_save_single_results(x: List[int], min_y: List[float], filename: str, ty
     # Create the plot
     plt.scatter(x, min_y, s=20, alpha=0.6, edgecolors='w', linewidth=0.5)
     
+    p_string = ""
     if(p!=None):
         y_fit = p(np.array(x))
         plt.plot(x, y_fit, color='blue', label='Fitted Polynomial')
+        p_string = f"  -   r={p}"
     
     # Add titles and labels
-    plt.title(f'{type} RTT value')
+    plt.title(f'{type} RTT value {p_string}')
     plt.xlabel('L (pkt size) - bytes')
     plt.ylabel(f'RTT_{type} - ms')
     plt.savefig(filename)
 
 
 K = 200 # number of packets sent for each L_byte value
-target_name = "89.84.1.242"
-L_byte_step=50
+target_name = "lyon.testdebit.info"
+L_byte_step=20
 max_threads=10
 execution_name = f"pings_{target_name}_K{K}_step{L_byte_step}_th{max_threads}"
 # execution_name = "pings_lyon.testdebit.info_K100_step20_th10"
 output_file = f"{execution_name}.txt"
-perform_pings_and_save_into_file(K=K, L_byte_step=L_byte_step, output_file=output_file, target_name=target_name, function=win_psping, max_threads=max_threads)
+#perform_pings_and_save_into_file(K=K, L_byte_step=L_byte_step, output_file=output_file, target_name=target_name, function=win_psping, max_threads=max_threads)
 results: List[Result] = parse_ping_result_data(output_file)
 
 x = [result.L_bytes for result in results]
 all_y = [result.rtt_list for result in results]
+all_results_plot_filename = f"{execution_name}_all.png"
+plot_save_multiple_results(x, all_y, all_results_plot_filename)
+
+min_results_plot_filename = f"{execution_name}_min.png"
 min_y = [min(result.rtt_list) for result in results]
 p = Polynomial.fit(x, min_y, 1)
 print(p)
-
-all_results_plot_filename = f"{execution_name}_all.png"
-plot_save_multiple_results(x, all_y, all_results_plot_filename, p)
-
-min_results_plot_filename = f"{execution_name}_min.png"
 plot_save_single_results(x, min_y, min_results_plot_filename, "Min", p)
 
 avg_y = [mean(result.rtt_list) for result in results]
@@ -113,9 +113,9 @@ plot_save_single_results(x, avg_y, avg_results_plot_filename, "Avg")
 
 max_y = [max(result.rtt_list) for result in results]
 max_results_plot_filename = f"{execution_name}_max.png"
-plot_save_single_results(x, avg_y, max_results_plot_filename, "Max")
+plot_save_single_results(x, max_y, max_results_plot_filename, "Max")
 
 stdev_y = [statistics.stdev(result.rtt_list) for result in results]
 stdev_results_plot_filename = f"{execution_name}_stdev.png"
-plot_save_single_results(x, avg_y, stdev_results_plot_filename, "stdev")
+plot_save_single_results(x, stdev_y, stdev_results_plot_filename, "stdev")
 
