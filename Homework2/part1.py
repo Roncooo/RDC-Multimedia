@@ -13,7 +13,7 @@ def number_of_nodes_with_ping_and_traceroute(target_name:str):
     
     start_time = time.time()
     # takes around 10 seconds
-    n_ping = find_nodes_with_ping(target_name=target_name, min_ttl=1, max_ttl=40, max_workers=10, output_file="nodes_with_ping_result.txt") 
+    n_ping = find_nodes_with_ping(target_name=target_name, min_ttl=1, max_ttl=40, max_workers=40, output_file="nodes_with_ping_result.txt") 
     end_time = time.time()
     print(elements_pattern.format("ping", n_ping, end_time-start_time))
     
