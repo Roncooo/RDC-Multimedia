@@ -2,10 +2,11 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures._base import Future
 from typing import List
+from commands import win_psping
 from commands import win_ping
 from commands import linux_ping
-from commands import win_psping
-from commands import traceroute
+from commands import win_traceroute
+from commands import linux_traceroute
 
 class Result:
     def __init__(self, l_bytes: int, list: List[float]):
@@ -85,8 +86,8 @@ def linux_ping_reached(result_string) -> bool:
     reached_destination: bool = not ttl_expired
     return reached_destination
 
-def find_nodes_with_ping_callback(future: Future, ping_function) -> None:
-    file_name, ttl = future.args
+def find_nodes_with_ping_callback(future: Future) -> None:
+    file_name, ttl, ping_function = future.args
     f = open(file_name)
     result_string = f.read()
     f.close()
@@ -109,8 +110,8 @@ def find_nodes_with_ping(target_name, ping_function, min_ttl=1, max_ttl=20, outp
         # Submit tasks to the executor
         for ttl in range(min_ttl, max_ttl+1):
             temp_file_name = temp_file_name_pattern.format(str(ttl))
-            future = executor.submit(ping_function, target_name, ttl, K, L, True, temp_file_name)
-            future.args = temp_file_name, ttl
+            future = executor.submit(ping_function, target_name=target_name, ttl=ttl, K=K, L=L, result_file=temp_file_name)
+            future.args = temp_file_name, ttl, ping_function
             future.add_done_callback(find_nodes_with_ping_callback)
             futures.append(future)
 
@@ -128,9 +129,9 @@ def find_nodes_with_ping(target_name, ping_function, min_ttl=1, max_ttl=20, outp
     return number_of_nodes
 
 
-def find_min_ttl_with_traceroute(target_name, output_file="nodes_with_traceroute_result.txt") -> int:
+def find_min_ttl_with_traceroute(target_name, traceroute_function, output_file="nodes_with_traceroute_result.txt") -> int:
     
-    traceroute(target_name, output_file)
+    traceroute_function(target_name=target_name, result_file=output_file)
     f = open(output_file)
     result_string = f.read()
     f.close()

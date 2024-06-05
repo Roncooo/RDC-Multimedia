@@ -1,5 +1,9 @@
 from utilities import find_nodes_with_ping
 from utilities import find_min_ttl_with_traceroute
+from commands import win_ping
+from commands import linux_ping
+from commands import win_traceroute
+from commands import linux_traceroute
 import time
 
 def number_of_nodes_with_ping_and_traceroute(target_name:str, ping_function, traceroute_function):
@@ -15,7 +19,7 @@ def number_of_nodes_with_ping_and_traceroute(target_name:str, ping_function, tra
     print(elements_pattern.format("ping", n_ping, end_time-start_time))
     
     start_time = time.time()
-    n_traceroute = find_min_ttl_with_traceroute(target_name, traceroute_function) # takes around 90 seconds
+    n_traceroute = find_min_ttl_with_traceroute(target_name=target_name, traceroute_function=traceroute_function) # takes around 90 seconds
     end_time = time.time()
     print(elements_pattern.format("traceroute", n_traceroute, end_time-start_time))
 
