@@ -74,31 +74,42 @@ def parse_ping_result(result_string: str, function) -> List[float]:
         return parse_linux_ping(result_string)
 
 
-def find_nodes_with_ping_callback(future: Future) -> None:
+def win_ping_reached(result_string) -> bool:
+    ttl_expired: bool = result_string.find("TTL scaduto durante il passaggio")!=-1
+    request_expired: bool = result_string.find("Richiesta scaduta")!=-1
+    reached_destination: bool = (not ttl_expired) and (not request_expired)
+    return reached_destination
+
+def linux_ping_reached(result_string) -> bool:
+    ttl_expired: bool = result_string.find("Time exceeded: Hop limit")!=-1
+    reached_destination: bool = not ttl_expired
+    return reached_destination
+
+def find_nodes_with_ping_callback(future: Future, ping_function) -> None:
     file_name, ttl = future.args
     f = open(file_name)
     result_string = f.read()
     f.close()
     os.remove(file_name)
-    
-    ttl_expired: bool = result_string.find("TTL scaduto durante il passaggio")!=-1
-    request_expired: bool = result_string.find("Richiesta scaduta")!=-1
-    reached_destination: bool = (not ttl_expired) and (not request_expired)
+    if ping_function==win_ping:
+        reached_destination = win_ping_reached(result_string)
+    else:
+        reached_destination = linux_ping_reached(result_string)
     future.result = ttl, reached_destination
     
 
-def find_nodes_with_ping(target_name, min_ttl=1, max_ttl=20, output_file="nodes_with_ping_result.txt") -> int:
+def find_nodes_with_ping(target_name, ping_function, min_ttl=1, max_ttl=20, output_file="nodes_with_ping_result.txt", max_workers=5) -> int:
     
     K=1 # number of packets sent for each ping
     L=1 # number of bytes sent for each packet
     temp_file_name_pattern = "temp_ping_ttl_{}.txt"
     
-    with ThreadPoolExecutor(max_workers=5) as executor:
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = []
         # Submit tasks to the executor
         for ttl in range(min_ttl, max_ttl+1):
             temp_file_name = temp_file_name_pattern.format(str(ttl))
-            future = executor.submit(win_ping, target_name, ttl, K, L, True, temp_file_name)
+            future = executor.submit(ping_function, target_name, ttl, K, L, True, temp_file_name)
             future.args = temp_file_name, ttl
             future.add_done_callback(find_nodes_with_ping_callback)
             futures.append(future)

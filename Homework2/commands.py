@@ -65,7 +65,7 @@ def win_psping(target_name: str, ttl: int=None, K: int=None, L: int=None, do_not
     os.system(command)
 
 
-def traceroute(target_name: str, result_file:str=None):
+def win_traceroute(target_name: str, result_file:str=None):
     """
     Creates and executes the traceroute command with the given parameters and, if set, prints the output into result_file.
     
@@ -76,6 +76,21 @@ def traceroute(target_name: str, result_file:str=None):
     """
     
     command = f'tracert {target_name} '
+    command += f'> {result_file}' if(result_file != None) else ""
+    
+    os.system(command)
+
+def linux_traceroute(target_name: str, result_file:str=None):
+    """
+    Creates and executes the traceroute command with the given parameters and, if set, prints the output into result_file.
+    
+    Parameters:
+    target_name:    target of the traceroute command
+    result_file:    name of the txt file in which the result is stored
+    
+    """
+    
+    command = f'traceroute {target_name} '
     command += f'> {result_file}' if(result_file != None) else ""
     
     os.system(command)
