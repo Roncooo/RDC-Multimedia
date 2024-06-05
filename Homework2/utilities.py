@@ -4,9 +4,7 @@ from concurrent.futures._base import Future
 from typing import List
 from commands import win_psping
 from commands import win_ping
-from commands import linux_ping
 from commands import win_traceroute
-from commands import linux_traceroute
 
 class Result:
     def __init__(self, l_bytes: int, list: List[float]):
@@ -32,7 +30,7 @@ def parse_win_psping(result_string: str) -> List[float]:
     return result_array
 
 
-def parse_win_ping(result_string: str) -> List[float]:
+def parse_win_ping_ita(result_string: str) -> List[float]:
     result_array = []
     time_prefix = "durata="
     measure_unit = "ms"
@@ -47,19 +45,6 @@ def parse_win_ping(result_string: str) -> List[float]:
         result_array.append(time)
     return result_array
 
-def parse_linux_ping(result_string: str) -> List[float]:
-    result_array = []
-    time_prefix = "time="
-    for line in result_string.splitlines():
-        if line=="":
-            continue
-        index = line.find(time_prefix)
-        if index == -1:
-            continue
-        time_word = line[index + len(time_prefix):]
-        time = float(time_word.split()[0])
-        result_array.append(time)
-    return result_array
 
 
 def parse_ping_result(result_string: str, function) -> List[float]:
@@ -70,36 +55,26 @@ def parse_ping_result(result_string: str, function) -> List[float]:
     if function==win_psping:
         return parse_win_psping(result_string)
     if function==win_ping:
-        return parse_win_ping(result_string)
-    if function==linux_ping:
-        return parse_linux_ping(result_string)
+        return parse_win_ping_ita(result_string)
 
 
-def win_ping_reached(result_string) -> bool:
+def win_ping_reached_ita(result_string) -> bool:
     ttl_expired: bool = result_string.find("TTL scaduto durante il passaggio")!=-1
     request_expired: bool = result_string.find("Richiesta scaduta")!=-1
     reached_destination: bool = (not ttl_expired) and (not request_expired)
     return reached_destination
 
-def linux_ping_reached(result_string) -> bool:
-    ttl_expired: bool = result_string.find("Time exceeded: Hop limit")!=-1
-    reached_destination: bool = not ttl_expired
-    return reached_destination
-
 def find_nodes_with_ping_callback(future: Future) -> None:
-    file_name, ttl, ping_function = future.args
+    file_name, ttl = future.args
     f = open(file_name)
     result_string = f.read()
     f.close()
     os.remove(file_name)
-    if ping_function==win_ping:
-        reached_destination = win_ping_reached(result_string)
-    else:
-        reached_destination = linux_ping_reached(result_string)
+    reached_destination = win_ping_reached_ita(result_string)
     future.result = ttl, reached_destination
     
 
-def find_nodes_with_ping(target_name, ping_function, min_ttl=1, max_ttl=20, output_file="nodes_with_ping_result.txt", max_workers=5) -> int:
+def find_nodes_with_ping(target_name, min_ttl=1, max_ttl=40, max_workers=10, output_file="nodes_with_ping_result.txt") -> int:
     
     K=1 # number of packets sent for each ping
     L=1 # number of bytes sent for each packet
@@ -110,8 +85,8 @@ def find_nodes_with_ping(target_name, ping_function, min_ttl=1, max_ttl=20, outp
         # Submit tasks to the executor
         for ttl in range(min_ttl, max_ttl+1):
             temp_file_name = temp_file_name_pattern.format(str(ttl))
-            future = executor.submit(ping_function, target_name=target_name, ttl=ttl, K=K, L=L, result_file=temp_file_name)
-            future.args = temp_file_name, ttl, ping_function
+            future = executor.submit(win_ping, target_name=target_name, ttl=ttl, K=K, L=L, result_file=temp_file_name)
+            future.args = temp_file_name, ttl
             future.add_done_callback(find_nodes_with_ping_callback)
             futures.append(future)
 
@@ -129,9 +104,9 @@ def find_nodes_with_ping(target_name, ping_function, min_ttl=1, max_ttl=20, outp
     return number_of_nodes
 
 
-def find_min_ttl_with_traceroute(target_name, traceroute_function, output_file="nodes_with_traceroute_result.txt") -> int:
+def find_min_ttl_with_traceroute(target_name, output_file="nodes_with_traceroute_result.txt") -> int:
     
-    traceroute_function(target_name=target_name, result_file=output_file)
+    win_traceroute(target_name=target_name, result_file=output_file)
     f = open(output_file)
     result_string = f.read()
     f.close()

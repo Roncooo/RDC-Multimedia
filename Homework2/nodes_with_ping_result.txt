@@ -19,5 +19,25 @@ TTL	reached destination
 18	True
 19	True
 20	True
+21	True
+22	True
+23	True
+24	True
+25	True
+26	True
+27	True
+28	True
+29	True
+30	True
+31	True
+32	True
+33	True
+34	True
+35	True
+36	True
+37	True
+38	True
+39	True
+40	True
 
 The minimum TTL to reach destination (number of nodes) is 14
