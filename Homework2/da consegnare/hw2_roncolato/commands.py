@@ -2,7 +2,7 @@ import os
 
 def win_ping(target_name: str, ttl: int=None, K: int=None, L: int=None, do_not_fragmentate:bool=True, result_file:str=None):
     """
-    Creates the ping command with the given parameters and, if set, prints the output into result_file.
+    Creates the ping command for Windows with the given parameters and, if set, prints the output into result_file.
     
     Parameters:
     target_name:        target of the ping command
@@ -23,9 +23,9 @@ def win_ping(target_name: str, ttl: int=None, K: int=None, L: int=None, do_not_f
     os.system(command)
     
 
-def win_psping(target_name: str, ttl: int=None, K: int=None, L: int=None, do_not_fragmentate:bool=True, result_file:str=None):
+def win_psping(target_name: str, K: int=None, L: int=None, result_file:str=None):
     """
-    Creates the psping command with the given parameters and, if set, prints the output into result_file.
+    Creates the psping command for Windows with the given parameters and, if set, prints the output into result_file.
     
     Parameters:
     target_name:    target of the ping command
@@ -45,7 +45,7 @@ def win_psping(target_name: str, ttl: int=None, K: int=None, L: int=None, do_not
 
 def win_traceroute(target_name: str, result_file:str=None):
     """
-    Creates and executes the traceroute command with the given parameters and, if set, prints the output into result_file.
+    Creates and executes the traceroute command for Windwos with the given parameters and, if set, prints the output into result_file.
     
     Parameters:
     target_name:    target of the traceroute command
